@@ -1,7 +1,8 @@
-const express = require("express");
-const cors = require("cors");
-const { PrismaClient } = require("@prisma/client");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const { PrismaClient } = require('@prisma/client');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -9,72 +10,86 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
-// Rota de teste
-app.get("/", (req, res) => {
-  res.send("API do Projeto DFS-2025.2 está funcionando ✅");
-});
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Listar todos os usuários
-app.get("/usuarios", async (req, res) => {
-  const usuarios = await prisma.usuario.findMany();
-  res.json(usuarios);
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename:    (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '_')),
 });
+const upload = multer({ storage });
 
-// Cadastrar novo usuário
-app.post("/usuarios", async (req, res) => {
-  const { nome, email, senha, telefone, dataNascimento, endereco } = req.body;
+app.post('/usuarios', upload.single('avatar'), async (req, res) => {
   try {
-    const novoUsuario = await prisma.usuario.create({
+    const { nome, email, senha, telefone, dataNascimento, endereco } = req.body;
+    const novo = await prisma.usuario.create({
       data: {
         nome,
         email,
         senha,
         telefone,
-        dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
         endereco,
+        dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
+        avatar: req.file ? req.file.filename : null,
       },
     });
-    res.status(201).json(novoUsuario);
-  } catch (error) {
-    res.status(400).json({ erro: "Erro ao cadastrar usuário", detalhes: error });
+    res.status(201).json(novo);
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(400).json({ mensagem: 'E-mail já cadastrado', detalhes: err });
+    }
+    res.status(500).json({ mensagem: 'Erro ao criar usuário', detalhes: err });
   }
 });
 
-// Editar usuário
-app.put("/usuarios/:id", async (req, res) => {
+app.put('/usuarios/:id', upload.single('avatar'), async (req, res) => {
   const { id } = req.params;
-  const { nome, email, senha, telefone, dataNascimento, endereco } = req.body;
+  const { nome, email, senha, telefone, dataNascimento, endereco, removeAvatar } = req.body;
+
   try {
-    const usuarioAtualizado = await prisma.usuario.update({
+    const dadosUpdate = {
+      nome,
+      email,
+      senha,
+      telefone,
+      endereco,
+      dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
+    };
+
+    if (removeAvatar === 'true') {
+      dadosUpdate.avatar = null;
+    } else if (req.file) {
+      dadosUpdate.avatar = req.file.filename;
+    }
+
+    const updated = await prisma.usuario.update({
       where: { id: Number(id) },
-      data: {
-        nome,
-        email,
-        senha,
-        telefone,
-        dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
-        endereco,
-      },
+      data: dadosUpdate,
     });
-    res.json(usuarioAtualizado);
-  } catch (error) {
-    res.status(400).json({ erro: "Erro ao editar usuário", detalhes: error });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ mensagem: 'Erro ao atualizar usuário', detalhes: err });
   }
 });
 
-// Excluir usuário
-app.delete("/usuarios/:id", async (req, res) => {
+
+app.get('/usuarios', async (req, res) => {
+  const list = await prisma.usuario.findMany();
+  res.json(list);
+});
+
+
+app.delete('/usuarios/:id', async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.usuario.delete({ where: { id: Number(id) } });
-    res.json({ mensagem: "Usuário excluído com sucesso" });
-  } catch (error) {
-    res.status(400).json({ erro: "Erro ao excluir usuário", detalhes: error });
+    res.json({ mensagem: 'Usuário excluído com sucesso' });
+  } catch (err) {
+    res.status(500).json({ mensagem: 'Erro ao excluir usuário', detalhes: err });
   }
 });
 
-// Iniciar o servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

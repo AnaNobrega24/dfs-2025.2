@@ -1,70 +1,98 @@
-# Getting Started with Create React App
+# Cadastro e Gerenciamento de Usuários
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Projeto individual do curso de Desenvolvimento Full Stack Básico (DFS-2025.2) que implementa um sistema completo de **CRUD** de usuários, com backend em Node.js/Express e frontend em React.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📋 Descrição
 
-### `npm start`
+Uma aplicação web para cadastrar, listar, editar e excluir usuários, com dados pessoais (nome, e-mail, senha, telefone, data de nascimento, endereço) e upload de avatar. Inclui recursos avançados como busca, paginação, validações, feedback visual e modal de detalhes.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Funcionalidades
 
-### `npm test`
+* **CRUD** de usuários (Create, Read, Update, Delete)
+* Upload de avatar com remoção opcional
+* Busca por nome e e-mail em tempo real
+* Paginação de resultados
+* Ordenação alfabética (A→Z / Z→A)
+* Modal de detalhes com data de cadastro
+* Validação de formulário (campos obrigatórios + regex de e-mail)
+* Máscara de telefone no formato brasileiro
+* Campo de senha com toggle mostrar/esconder
+* Feedback visual com toasts (Bootstrap)
+* Data de nascimento e data de cadastro salvas e formatadas
+* Layout responsivo usando Bootstrap 5
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🛠 Tecnologias Utilizadas
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Backend
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Node.js 16+
+* Express
+* Prisma ORM
+* PostgreSQL
+* Multer (upload de arquivos)
+* Cors, dotenv
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Frontend
 
-### `npm run eject`
+* React 18+
+* Axios
+* Bootstrap 5
+* React-Bootstrap
+* React-Bootstrap-Icons
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📦 Instalação e Execução
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. **Clone o repositório**:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+   ```bash
+   git clone <URL_DO_REPOSITORIO>
+   cd PROJETO-DFS-2025.2
+   ```
 
-## Learn More
+2. **Configurar o backend**:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Edite .env e defina DATABASE_URL (PostgreSQL)
+   npm install
+   npx prisma migrate dev --name init
+   npm run dev
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   O servidor backend ficará acessível em `http://localhost:5000`.
 
-### Code Splitting
+3. **Configurar o frontend**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+   ```bash
+   cd ../frontend
+   npm install
+   npm start
+   ```
 
-### Analyzing the Bundle Size
+   O frontend será aberto em `http://localhost:3000`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 📁 Estrutura do Projeto
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+backend/        # API REST (Express + Prisma)
+  ├─ index.js   # Entrypoint do servidor
+  ├─ prisma/    # Migrations e schema
+  └─ uploads/   # Avatares enviados
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+frontend/       # UI em React
+  ├─ src/
+  │  ├─ components/   # Componentes React (Form, Lista, Modal, Toast)
+  │  ├─ services/api.js
+  │  └─ App.js
+  └─ public/

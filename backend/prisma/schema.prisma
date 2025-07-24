@@ -15,5 +15,6 @@ model Usuario {
   telefone       String?
   dataNascimento DateTime?
   endereco       String?
+  avatar         String?
   criadoEm       DateTime @default(now())
 }

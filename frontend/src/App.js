@@ -1,23 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import UsuarioForm from './components/UsuarioForm';
+import UsuarioLista from './components/UsuarioLista';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  const atualizarLista = (usuario = null) => {
+    setUsuarioEditando(usuario);
+    setRefresh(prev => !prev);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container mt-5">
+      <ToastContainer />
+      <div className="card shadow p-4">
+        <h1 className="text-center mb-4">Cadastro e Gerenciamento de Usuários</h1>
+
+        <UsuarioForm
+          usuarioEditando={usuarioEditando}
+          onAtualizar={atualizarLista}
+        />
+
+        <UsuarioLista
+          onEditar={usuario => setUsuarioEditando(usuario)}
+          refresh={refresh}
+        />
+      </div>
     </div>
   );
 }
