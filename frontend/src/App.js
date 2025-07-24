@@ -14,7 +14,7 @@ function App() {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="container py-5">
       <ToastContainer />
       <div className="card shadow p-4">
         <h1 className="text-center mb-4">Cadastro e Gerenciamento de Usuários</h1>
