@@ -37,18 +37,12 @@ function UsuarioLista({ onEditar, refresh }) {
     carregarUsuarios();
   }, [refresh]);
 
-  const excluirUsuario = async id => {
-    if (window.confirm('Deseja realmente excluir este usuário?')) {
-      try {
-        await api.delete(`/usuarios/${id}`);
-        carregarUsuarios();
-      } catch (error) {
-        console.error('Erro ao excluir usuário:', error);
-      }
-    }
-  };
+  // Quando a busca mudar, volta à página 1
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca]);
 
-  // Filtra e ordena
+  // Recalcula total de páginas e, se a página atual for maior que o total, reseta para 1
   const usuariosFiltrados = usuarios
     .filter(u =>
       u.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -60,10 +54,30 @@ function UsuarioLista({ onEditar, refresh }) {
       return ordenadoAsc ? na.localeCompare(nb) : nb.localeCompare(na);
     });
 
-  // Cálculo da páginação
-  const indexInicial = (paginaAtual - 1) * usuariosPorPagina;
-  const usuariosPaginados = usuariosFiltrados.slice(indexInicial, indexInicial + usuariosPorPagina);
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+  useEffect(() => {
+    if (paginaAtual > totalPaginas && totalPaginas > 0) {
+      setPaginaAtual(1);
+    }
+  }, [totalPaginas, paginaAtual]);
+
+  // Seleciona somente os que cabem na página atual
+  const indexInicial = (paginaAtual - 1) * usuariosPorPagina;
+  const usuariosPaginados = usuariosFiltrados.slice(
+    indexInicial,
+    indexInicial + usuariosPorPagina
+  );
+
+  const excluirUsuario = async id => {
+    if (window.confirm('Deseja realmente excluir este usuário?')) {
+      try {
+        await api.delete(`/usuarios/${id}`);
+        carregarUsuarios();
+      } catch (error) {
+        console.error('Erro ao excluir usuário:', error);
+      }
+    }
+  };
 
   return (
     <div>
@@ -96,7 +110,6 @@ function UsuarioLista({ onEditar, refresh }) {
               className="list-group-item d-flex justify-content-between align-items-center"
             >
               <div className="d-flex align-items-center">
-                {/* Avatar */}
                 {usuario.avatar ? (
                   <img
                     src={`http://localhost:5000/uploads/${usuario.avatar}`}
@@ -122,15 +135,11 @@ function UsuarioLista({ onEditar, refresh }) {
                       .substring(0, 2)}
                   </div>
                 )}
-
-                {/* Nome + e-mail */}
                 <div>
                   <strong>{usuario.nome}</strong><br />
                   <small className="text-muted">{usuario.email}</small>
                 </div>
               </div>
-
-              {/* Ações */}
               <div>
                 <button
                   className="btn btn-info btn-sm me-2"
@@ -186,11 +195,9 @@ function UsuarioLista({ onEditar, refresh }) {
         <Modal.Header closeButton>
           <Modal.Title>Detalhes do Usuário</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           {modalUsuario && (
             <div className="text-center">
-              {/* Avatar grande */}
               {modalUsuario.avatar && (
                 <img
                   src={`http://localhost:5000/uploads/${modalUsuario.avatar}`}
@@ -199,31 +206,29 @@ function UsuarioLista({ onEditar, refresh }) {
                   style={{ width: 100, height: 100, objectFit: 'cover' }}
                 />
               )}
-
               <ul className="list-unstyled text-start">
                 <li>
-                  <PersonFill className="me-2" />
-                  <strong>Nome:</strong> {modalUsuario.nome}
+                  <PersonFill className="me-2" /> <strong>Nome:</strong>{' '}
+                  {modalUsuario.nome}
                 </li>
                 <li>
-                  <EnvelopeFill className="me-2" />
-                  <strong>E-mail:</strong> {modalUsuario.email}
+                  <EnvelopeFill className="me-2" /> <strong>E-mail:</strong>{' '}
+                  {modalUsuario.email}
                 </li>
                 <li>
-                  <TelephoneFill className="me-2" />
-                  <strong>Telefone:</strong> {modalUsuario.telefone}
+                  <TelephoneFill className="me-2" /> <strong>Telefone:</strong>{' '}
+                  {modalUsuario.telefone}
                 </li>
                 <li>
-                  <CalendarFill className="me-2" />
-                  <strong>Nascimento:</strong>{' '}
+                  <CalendarFill className="me-2" /> <strong>Nascimento:</strong>{' '}
                   {modalUsuario.dataNascimento?.split('T')[0]}
                 </li>
                 <li>
-                  <HouseFill className="me-2" />
-                  <strong>Endereço:</strong> {modalUsuario.endereco}
+                  <HouseFill className="me-2" /> <strong>Endereço:</strong>{' '}
+                  {modalUsuario.endereco}
                 </li>
                 <li>
-                  <CalendarCheckFill className="me-2" />
+                  <CalendarCheckFill className="me-2" />{' '}
                   <strong>Data de Cadastro:</strong>{' '}
                   {modalUsuario.criadoEm?.split('T')[0]}
                 </li>
@@ -231,7 +236,6 @@ function UsuarioLista({ onEditar, refresh }) {
             </div>
           )}
         </Modal.Body>
-
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setModalUsuario(null)}>
             Fechar

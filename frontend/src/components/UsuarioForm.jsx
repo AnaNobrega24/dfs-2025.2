@@ -16,11 +16,11 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
   const [avatar, setAvatar] = useState(null);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [removeAvatar, setRemoveAvatar] = useState(false);
+
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastVariant, setToastVariant] = useState('success');
 
-  // Quando entra em modo edição, preenche o form
   useEffect(() => {
     if (usuarioEditando) {
       setFormData({
@@ -36,7 +36,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
       setAvatar(null);
       setRemoveAvatar(false);
     } else {
-      // limpa ao sair da edição
+      // ao sair do modo edição, limpa o formulário
       setFormData({
         nome: '',
         email: '',
@@ -50,7 +50,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
     }
   }, [usuarioEditando]);
 
-  // Máscara de telefone BR
+  // máscara de telefone brasileiro
   const formatPhone = value => {
     const digits = value.replace(/\D/g, '').substring(0, 11);
     if (digits.length <= 2) return `(${digits}`;
@@ -61,7 +61,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
     return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
   };
 
-  // Handle change genérico + máscara no telefone
   const handleChange = e => {
     const { name, value } = e.target;
     if (name === 'telefone') {
@@ -75,7 +74,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
     e.preventDefault();
     const { nome, email, senha, telefone, dataNascimento } = formData;
 
-    // validações básicas
+    // validações
     if (!nome || !email || !senha || !telefone || !dataNascimento) {
       setToastVariant('warning');
       setToastMsg('Preencha todos os campos obrigatórios.');
@@ -91,7 +90,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
     }
 
     try {
-      // monta FormData
       const fd = new FormData();
       Object.entries(formData).forEach(([k, v]) => v && fd.append(k, v));
       if (avatar) fd.append('avatar', avatar);
@@ -109,6 +107,18 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
         });
         setToastVariant('success');
         setToastMsg('Usuário cadastrado com sucesso!');
+
+        // ←── AQUI: limpa o formulário APENAS no cadastro de novo usuário
+        setFormData({
+          nome: '',
+          email: '',
+          senha: '',
+          telefone: '',
+          dataNascimento: '',
+          endereco: ''
+        });
+        setAvatar(null);
+        setRemoveAvatar(false);
       }
 
       setShowToast(true);
@@ -128,7 +138,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
 
   return (
     <>
-      {/* Toasts */}
       <ToastContainer position="top-end" className="p-3">
         <Toast
           onClose={() => setShowToast(false)}
@@ -141,7 +150,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
         </Toast>
       </ToastContainer>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="row g-3 mb-4">
         {/* Nome */}
         <div className="col-md-6">
@@ -155,7 +163,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             required
           />
         </div>
-
         {/* E-mail */}
         <div className="col-md-6">
           <input
@@ -168,8 +175,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             required
           />
         </div>
-
-        {/* Senha com botão mostrar/esconder */}
+        {/* Senha */}
         <div className="col-md-6 position-relative">
           <input
             type={mostrarSenha ? 'text' : 'password'}
@@ -188,8 +194,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             {mostrarSenha ? <EyeSlash /> : <Eye />}
           </span>
         </div>
-
-        {/* Telefone com máscara */}
+        {/* Telefone */}
         <div className="col-md-6">
           <input
             type="text"
@@ -201,7 +206,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             required
           />
         </div>
-
         {/* Data de nascimento */}
         <div className="col-md-6">
           <input
@@ -213,7 +217,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             required
           />
         </div>
-
         {/* Endereço */}
         <div className="col-md-6">
           <input
@@ -225,7 +228,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             onChange={handleChange}
           />
         </div>
-
         {/* Upload de avatar */}
         <div className="col-md-12">
           <label className="form-label">
@@ -239,8 +241,7 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             onChange={e => setAvatar(e.target.files[0])}
           />
         </div>
-
-        {/* Checkbox remover avatar (só em edição) */}
+        {/* Remover avatar (somente em edição) */}
         {usuarioEditando?.avatar && (
           <div className="col-md-12 form-check">
             <input
@@ -255,7 +256,6 @@ function UsuarioForm({ usuarioEditando, onAtualizar }) {
             </label>
           </div>
         )}
-
         {/* Botões */}
         <div className="col-12 d-flex justify-content-between">
           {usuarioEditando && (
